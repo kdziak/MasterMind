@@ -59,35 +59,66 @@ class Game
   end
 
   def gameplay
-    player_array = p1.player_guess_getter
-    code_to_guess = mastermind.computer_code
-    win_checker(code_to_guess, player_array)
-    color_checker_at_right_spot(code_to_guess, player_array)
+    until @game_over
+      p mastermind.computer_code
+      player_array = p1.player_guess_getter
+      code_to_guess = mastermind.computer_code
+      win_checker(code_to_guess, player_array)
+      use = color_checker_at_right_spot(code_to_guess, player_array)
+      right_color_wrong_spot(use, player_array)
+      @board << player_array
+      p " These are you old guesses #{@board}"
+      @turn_count +=1
+    end
   end
 
   def win_checker(code_to_guess, player_array)
     return unless code_to_guess == player_array
 
     p 'You Won!'
+    @game_over = true
   end
 
   def color_checker_at_right_spot(code_to_guess, player_array)
     i = 0
-    code_to_guess.each do |color|
+    method_use = code_to_guess.clone
+    method_use.each do |color|
       if color == player_array[i]
-        puts '1 Black Peg'
-      elsif code_to_guess.include?(player_array[i])
-        puts '1 white peg'
-      else
-        p 'got nothing for ya'
+        p '1 black peg'
+        method_use[i] = nil
+        player_array[i] = "!"
       end
       i += 1
+    end
+  end
+
+  def right_color_wrong_spot(use, player_array)
+    p use
+    p player_array
+    player_array.each do |color|
+      if color == use[0] 
+        p 'white peg'
+        use[0] = nil
+      elsif color == use[1]
+        p 'white peg'
+        use[1] = nil
+      elsif color == use[2]
+        p 'white peg'
+        use[2] = nil
+      elsif color == use[3]
+        p 'white peg'
+        use[3] = nil
+      else
+        p 'nope'
+      end
     end
   end
 end
 
 
 
+
 new_game = Game.new
 p new_game.mastermind.computer_code
 p BOARD
+
