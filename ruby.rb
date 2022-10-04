@@ -23,15 +23,26 @@ end
 
 # class for human player
 class Player
-  attr_accessor :player_name
+  attr_accessor :player_name, :guesser, :setter, :player_secret
 
   def initialize
     @player_name = player_name_getter
+    guesser_or_setter
   end
 
   def player_name_getter
     p 'Hello challenger... what is your name?'
     gets.chomp
+  end
+
+  def guesser_or_setter
+    p 'Do you want to guess the code or set the code?'
+    answer = gets.chomp
+    if answer == 'setter'
+      @setter = true
+    elsif answer == 'guesser'
+      @guesser = true
+    end
   end
 
   def player_guess_getter
@@ -42,6 +53,15 @@ class Player
     end
     BOARD << guess_array
     guess_array
+  end
+
+  def player_guess_setter
+    puts 'Make your code human.'
+    player_code = []
+    while player_code.length < 4
+      player_code << gets.chomp
+    end
+    @player_secret = player_code
   end
 end
 
@@ -56,22 +76,38 @@ class Game
     @mastermind = MasterMind.new
     @p1 = Player.new
     gameplay
+    computer_code_breaker
   end
 
   def gameplay
-    until @game_over
-      mastermind.computer_code
-      player_array = p1.player_guess_getter
-      code_to_guess = mastermind.computer_code
-      win_checker(code_to_guess, player_array)
-      use = color_checker_at_right_spot(code_to_guess, player_array)
-      right_color_wrong_spot(use, player_array)
-      @board << player_array
-      # p " These are you old guesses #{@board}"
-      p @turn_count +=1
-      turns = @turn_count
-      turn_tracker(turns)
-    end
+    return unless p1.guesser == true
+
+      until @game_over
+        mastermind.computer_code
+        player_array = p1.player_guess_getter
+        code_to_guess = mastermind.computer_code
+        win_checker(code_to_guess, player_array)
+        use = color_checker_at_right_spot(code_to_guess, player_array)
+        right_color_wrong_spot(use, player_array)
+        @turn_count +=1
+        turns = @turn_count
+        turn_tracker(turns)
+      end
+  end
+
+  def computer_code_breaker
+    return unless p1.setter == true
+
+      until @game_over
+        players_input = p1.player_guess_setter
+        all_combos = COLORS.repeated_permutation(4).to_a
+        p all_combos.count
+        p first_guess = all_combos[7]
+        win_checker(players_input, first_guess)
+        use_2 = color_checker_at_right_spot(first_guess, players_input)
+        right_color_wrong_spot(use_2, players_input)
+        @game_over = true
+      end
   end
 
   def win_checker(code_to_guess, player_array)
@@ -82,34 +118,38 @@ class Game
   end
 
   def color_checker_at_right_spot(code_to_guess, player_array)
+    black_peg = 0
     i = 0
     method_use = code_to_guess.clone
     method_use.each do |color|
       if color == player_array[i]
-        p '1 black peg'
+        black_peg += 1
         method_use[i] = nil
         player_array[i] = "!"
       end
       i += 1
     end
+    p "You have #{black_peg} black pegs"
   end
 
   def right_color_wrong_spot(use, player_array)
+    white_peg = 0
     player_array.each do |color|
       if color == use[0] 
-        p 'white peg'
+        white_peg += 1
         use[0] = nil
       elsif color == use[1]
-        p 'white peg'
+        white_peg += 1
         use[1] = nil
       elsif color == use[2]
-        p 'white peg'
+        white_peg += 1
         use[2] = nil
       elsif color == use[3]
-        p 'white peg'
+        white_peg += 1
         use[3] = nil
       end
     end
+    p "You have #{white_peg} white pegs" 
   end
 
   def turn_tracker(turns)
@@ -120,5 +160,3 @@ class Game
 end
 
 new_game = Game.new
-p new_game.mastermind.computer_code
-p BOARD
