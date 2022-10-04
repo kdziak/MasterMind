@@ -60,15 +60,17 @@ class Game
 
   def gameplay
     until @game_over
-      p mastermind.computer_code
+      mastermind.computer_code
       player_array = p1.player_guess_getter
       code_to_guess = mastermind.computer_code
       win_checker(code_to_guess, player_array)
       use = color_checker_at_right_spot(code_to_guess, player_array)
       right_color_wrong_spot(use, player_array)
       @board << player_array
-      p " These are you old guesses #{@board}"
-      @turn_count +=1
+      # p " These are you old guesses #{@board}"
+      p @turn_count +=1
+      turns = @turn_count
+      turn_tracker(turns)
     end
   end
 
@@ -93,8 +95,6 @@ class Game
   end
 
   def right_color_wrong_spot(use, player_array)
-    p use
-    p player_array
     player_array.each do |color|
       if color == use[0] 
         p 'white peg'
@@ -108,17 +108,17 @@ class Game
       elsif color == use[3]
         p 'white peg'
         use[3] = nil
-      else
-        p 'nope'
       end
+    end
+  end
+
+  def turn_tracker(turns)
+    if turns == 12
+      @game_over = true
     end
   end
 end
 
-
-
-
 new_game = Game.new
 p new_game.mastermind.computer_code
 p BOARD
-
