@@ -36,11 +36,11 @@ class Player
   end
 
   def guesser_or_setter
-    p 'Do you want to guess the code or set the code?'
+    p 'Do you want to (g)uess the code or (s)et the code?'
     answer = gets.chomp
-    if answer == 'setter'
+    if answer == 's'
       @setter = true
-    elsif answer == 'guesser'
+    elsif answer == 'g'
       @guesser = true
     end
   end
@@ -67,9 +67,11 @@ end
 
 # class for gameplay and gamelogic
 class Game
-  attr_accessor :mastermind, :p1
+  attr_accessor :mastermind, :p1, :black_pegs, :white_pegs
 
   def initialize
+    @black_pegs = 0
+    @white_pegs = 0
     @turn_count = 0
     @board = []
     @game_over = false
@@ -98,15 +100,13 @@ class Game
   def computer_code_breaker
     return unless p1.setter == true
 
+    players_input = p1.player_guess_setter
       until @game_over
-        players_input = p1.player_guess_setter
         all_combos = COLORS.repeated_permutation(4).to_a
-        p all_combos.count
-        p first_guess = all_combos[7]
-        win_checker(players_input, first_guess)
-        use_2 = color_checker_at_right_spot(first_guess, players_input)
-        right_color_wrong_spot(use_2, players_input)
-        @game_over = true
+        guess = all_combos.sample
+        win_checker(players_input, guess)
+        @turn_count += 1
+        
       end
   end
 
@@ -114,7 +114,10 @@ class Game
     return unless code_to_guess == player_array
 
     p 'You Won!'
+    p player_array
+    p @turn_count
     @game_over = true
+    
   end
 
   def color_checker_at_right_spot(code_to_guess, player_array)
@@ -130,12 +133,14 @@ class Game
       i += 1
     end
     p "You have #{black_peg} black pegs"
+    @black_pegs = black_peg
+    method_use
   end
 
   def right_color_wrong_spot(use, player_array)
     white_peg = 0
     player_array.each do |color|
-      if color == use[0] 
+      if color == use[0]
         white_peg += 1
         use[0] = nil
       elsif color == use[1]
@@ -149,7 +154,8 @@ class Game
         use[3] = nil
       end
     end
-    p "You have #{white_peg} white pegs" 
+    p "You have #{white_peg} white pegs"
+    @white_pegs = white_peg
   end
 
   def turn_tracker(turns)
